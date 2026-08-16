@@ -16,7 +16,12 @@ function hasValidSupabaseUrl(value: string | undefined) {
 
   try {
     const url = new URL(value)
-    return url.protocol === 'http:' || url.protocol === 'https:'
+    return (
+      (url.protocol === 'http:' || url.protocol === 'https:') &&
+      (url.pathname === '' || url.pathname === '/') &&
+      !url.search &&
+      !url.hash
+    )
   } catch {
     return false
   }
