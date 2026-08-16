@@ -181,6 +181,25 @@ function NavigationLinks({ mobile = false }: { mobile?: boolean }) {
   )
 }
 
+function SidebarCollapseIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="18"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+      viewBox="0 0 24 24"
+      width="18"
+    >
+      <rect height="16" rx="2" width="18" x="3" y="4" />
+      <path d="M9 4v16M14 9l-3 3 3 3" />
+    </svg>
+  )
+}
+
 export function AppLayout() {
   const location = useLocation()
   const { user } = useAuth()
@@ -261,6 +280,17 @@ export function AppLayout() {
               <small>{workspaceName}</small>
             </span>
           </NavLink>
+          {!sidebarCollapsed && (
+            <button
+              aria-label="Collapse sidebar"
+              className="sidebar-toggle"
+              onClick={toggleSidebar}
+              title="Collapse sidebar · H"
+              type="button"
+            >
+              <SidebarCollapseIcon />
+            </button>
+          )}
         </div>
 
         <NavigationLinks />

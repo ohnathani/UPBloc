@@ -198,6 +198,25 @@ input:focus {
   min-width: 0;
 }
 
+.sidebar-toggle {
+  align-items: center;
+  background: transparent;
+  border-radius: 0.45rem;
+  color: var(--upbloc-muted);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  gap: 0.35rem;
+  justify-content: center;
+  padding: 0.5rem 0.6rem;
+  white-space: nowrap;
+}
+
+.sidebar-toggle:hover:not(:disabled) {
+  background: var(--upbloc-burgundy-soft);
+  color: var(--upbloc-burgundy);
+}
+
 .app-brand {
   align-items: center;
   color: #172033;
