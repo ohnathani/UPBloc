@@ -1,10 +1,11 @@
 import type { AuthError, User } from '@supabase/supabase-js'
-import { supabase, supabaseConfigError } from '../../lib/supabase'
+import {
+  getSupabaseClient,
+  supabaseConfigError,
+} from '../../lib/supabase'
 
 function ensureSupabaseConfigured() {
-  if (supabaseConfigError) {
-    throw new Error(supabaseConfigError)
-  }
+  return getSupabaseClient()
 }
 
 export function getAuthErrorMessage(
@@ -72,9 +73,9 @@ function throwAuthError(error: AuthError, fallback: string): never {
 }
 
 export async function signIn(email: string, password: string) {
-  ensureSupabaseConfigured()
+  const client = ensureSupabaseConfigured()
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const { error } = await client.auth.signInWithPassword({ email, password })
   if (error) throwAuthError(error, 'Unable to log in. Please try again.')
 }
 
@@ -83,9 +84,9 @@ export async function signUp(
   password: string,
   displayName: string,
 ) {
-  ensureSupabaseConfigured()
+  const client = ensureSupabaseConfigured()
 
-  const { data, error } = await supabase.auth.signUp({
+  const { data, error } = await client.auth.signUp({
     email,
     password,
     options: {
@@ -99,9 +100,9 @@ export async function signUp(
 }
 
 export async function signInWithGoogle() {
-  ensureSupabaseConfigured()
+  const client = ensureSupabaseConfigured()
 
-  const { error } = await supabase.auth.signInWithOAuth({
+  const { error } = await client.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: `${window.location.origin}/dashboard`,
@@ -112,16 +113,16 @@ export async function signInWithGoogle() {
 }
 
 export async function signOut() {
-  ensureSupabaseConfigured()
+  const client = ensureSupabaseConfigured()
 
-  const { error } = await supabase.auth.signOut()
+  const { error } = await client.auth.signOut()
   if (error) throwAuthError(error, 'Unable to sign out. Please try again.')
 }
 
 export async function sendPasswordReset(email: string) {
-  ensureSupabaseConfigured()
+  const client = ensureSupabaseConfigured()
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  const { error } = await client.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/reset-password`,
   })
 
@@ -131,16 +132,16 @@ export async function sendPasswordReset(email: string) {
 }
 
 export async function updatePassword(password: string) {
-  ensureSupabaseConfigured()
+  const client = ensureSupabaseConfigured()
 
-  const { error } = await supabase.auth.updateUser({ password })
+  const { error } = await client.auth.updateUser({ password })
   if (error) throwAuthError(error, 'Unable to update your password.')
 }
 
 export async function updateUserMetadata(metadata: Record<string, string>) {
-  ensureSupabaseConfigured()
+  const client = ensureSupabaseConfigured()
 
-  const { data, error } = await supabase.auth.updateUser({ data: metadata })
+  const { data, error } = await client.auth.updateUser({ data: metadata })
   if (error) throwAuthError(error, 'Unable to update your profile.')
   return data.user as User
 }

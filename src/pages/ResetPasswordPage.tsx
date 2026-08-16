@@ -29,6 +29,11 @@ export function ResetPasswordPage() {
       return
     }
 
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -80,6 +85,7 @@ export function ResetPasswordPage() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             autoComplete="new-password"
+            minLength={6}
             required
           />
 

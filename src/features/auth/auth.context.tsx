@@ -5,7 +5,10 @@ import {
   type PropsWithChildren,
 } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { supabase, supabaseConfigError } from '../../lib/supabase'
+import {
+  getSupabaseClient,
+  supabaseConfigError,
+} from '../../lib/supabase'
 import type { AuthContextValue } from './auth.types'
 import {
   getAuthErrorMessage,
@@ -36,7 +39,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
       }
     }
 
-    supabase.auth.getSession().then(({ data, error }) => {
+    const client = getSupabaseClient()
+
+    client.auth.getSession().then(({ data, error }) => {
       if (!isMounted) return
 
       if (error) {
@@ -54,7 +59,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = client.auth.onAuthStateChange((_event, nextSession) => {
       if (isMounted) {
         setSession(nextSession)
         setAuthError(null)

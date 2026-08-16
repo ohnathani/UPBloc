@@ -28,6 +28,11 @@ export function RegisterPage() {
       return
     }
 
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -39,7 +44,7 @@ export function RegisterPage() {
 
       if (requiresEmailConfirmation) {
         setMessage(
-          'Account created. Check your email to confirm your account, then log in.',
+          'Account created. A verification email has been sent. Check your email to confirm your account, then log in.',
         )
       } else {
         navigate('/dashboard', { replace: true })
@@ -55,7 +60,7 @@ export function RegisterPage() {
     }
   }
 
-  const isBusy = authLoading || Boolean(authError) || isSubmitting
+  const isBusy = authLoading || isSubmitting
 
   return (
     <main className="page-shell">
@@ -93,6 +98,7 @@ export function RegisterPage() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             autoComplete="new-password"
+            minLength={6}
             required
           />
 
