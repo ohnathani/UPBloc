@@ -1,0 +1,146 @@
+import type { AuthError, User } from '@supabase/supabase-js'
+import { supabase, supabaseConfigError } from '../../lib/supabase'
+
+function ensureSupabaseConfigured() {
+  if (supabaseConfigError) {
+    throw new Error(supabaseConfigError)
+  }
+}
+
+export function getAuthErrorMessage(
+  error: unknown,
+  fallback = 'Something went wrong. Please try again.',
+) {
+  if (supabaseConfigError && error instanceof Error) {
+    return error.message
+  }
+
+  const message =
+    error && typeof error === 'object' && 'message' in error
+      ? String((error as { message?: unknown }).message ?? '')
+      : error instanceof Error
+        ? error.message
+        : ''
+
+  const normalizedMessage = message.toLowerCase()
+
+  if (normalizedMessage === 'invalid login credentials') {
+    return 'The email or password is incorrect.'
+  }
+
+  if (
+    normalizedMessage.includes('user already registered') ||
+    normalizedMessage.includes('already been registered')
+  ) {
+    return 'An account with this email already exists.'
+  }
+
+  if (
+    normalizedMessage.includes('password') &&
+    (normalizedMessage.includes('at least') ||
+      normalizedMessage.includes('weak') ||
+      normalizedMessage.includes('requirements'))
+  ) {
+    return message
+  }
+
+  if (normalizedMessage.includes('email')) {
+    if (normalizedMessage.includes('invalid')) {
+      return 'Enter a valid email address.'
+    }
+    if (normalizedMessage.includes('rate limit')) {
+      return 'Too many email requests. Please wait a moment and try again.'
+    }
+  }
+
+  if (
+    normalizedMessage.includes('failed to fetch') ||
+    normalizedMessage.includes('network')
+  ) {
+    return 'Unable to reach Supabase. Check your connection and try again.'
+  }
+
+  if (normalizedMessage.includes('session')) {
+    return 'Your authentication session is no longer valid. Please sign in again.'
+  }
+
+  return fallback
+}
+
+function throwAuthError(error: AuthError, fallback: string): never {
+  throw new Error(getAuthErrorMessage(error, fallback))
+}
+
+export async function signIn(email: string, password: string) {
+  ensureSupabaseConfigured()
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error) throwAuthError(error, 'Unable to log in. Please try again.')
+}
+
+export async function signUp(
+  email: string,
+  password: string,
+  displayName: string,
+) {
+  ensureSupabaseConfigured()
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name: displayName },
+    },
+  })
+
+  if (error) throwAuthError(error, 'Unable to create your account.')
+
+  return { requiresEmailConfirmation: data.session === null }
+}
+
+export async function signInWithGoogle() {
+  ensureSupabaseConfigured()
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/dashboard`,
+    },
+  })
+
+  if (error) throwAuthError(error, 'Unable to connect to Google.')
+}
+
+export async function signOut() {
+  ensureSupabaseConfigured()
+
+  const { error } = await supabase.auth.signOut()
+  if (error) throwAuthError(error, 'Unable to sign out. Please try again.')
+}
+
+export async function sendPasswordReset(email: string) {
+  ensureSupabaseConfigured()
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  })
+
+  if (error) {
+    throwAuthError(error, 'Unable to send the password reset email.')
+  }
+}
+
+export async function updatePassword(password: string) {
+  ensureSupabaseConfigured()
+
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) throwAuthError(error, 'Unable to update your password.')
+}
+
+export async function updateUserMetadata(metadata: Record<string, string>) {
+  ensureSupabaseConfigured()
+
+  const { data, error } = await supabase.auth.updateUser({ data: metadata })
+  if (error) throwAuthError(error, 'Unable to update your profile.')
+  return data.user as User
+}

@@ -4,11 +4,18 @@ import { useAuth } from '../features/auth/auth.hook'
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const { signIn, loading: authLoading, authError } = useAuth()
+  const {
+    signIn,
+    signInWithGoogle,
+    loading: authLoading,
+    authError,
+  } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitting, setSubmitting] = useState<'password' | 'google' | null>(
+    null,
+  )
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -19,7 +26,7 @@ export function LoginPage() {
       return
     }
 
-    setIsSubmitting(true)
+    setSubmitting('password')
 
     try {
       await signIn(email.trim(), password)
@@ -31,11 +38,27 @@ export function LoginPage() {
           : 'Unable to log in. Please try again.',
       )
     } finally {
-      setIsSubmitting(false)
+      setSubmitting(null)
     }
   }
 
-  const isBusy = authLoading || Boolean(authError) || isSubmitting
+  async function handleGoogleSignIn() {
+    setError(null)
+    setSubmitting('google')
+
+    try {
+      await signInWithGoogle()
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : 'Unable to connect to Google. Please try again.',
+      )
+      setSubmitting(null)
+    }
+  }
+
+  const isBusy = authLoading || submitting !== null
 
   return (
     <main className="page-shell">
@@ -45,10 +68,10 @@ export function LoginPage() {
         <p className="muted">Use your UPBloc account to continue.</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
-          <label htmlFor="login-email">Email or username</label>
+          <label htmlFor="login-email">Email</label>
           <input
             id="login-email"
-            type="text"
+            type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             autoComplete="email"
@@ -77,18 +100,30 @@ export function LoginPage() {
           )}
 
           <button type="submit" disabled={isBusy}>
-            {isSubmitting ? 'Logging in...' : 'Log in'}
+            {submitting === 'password' ? 'Logging in...' : 'Log in'}
           </button>
         </form>
 
-        {import.meta.env.DEV && (
-          <p className="form-footer">
-            Development admin: <code>admin</code> / <code>admin</code>
-          </p>
-        )}
+        <div className="auth-divider" aria-hidden="true">
+          <span>or</span>
+        </div>
+
+        <button
+          type="button"
+          className="button-secondary auth-provider-button"
+          onClick={handleGoogleSignIn}
+          disabled={isBusy}
+        >
+          {submitting === 'google'
+            ? 'Connecting to Google...'
+            : 'Continue with Google'}
+        </button>
 
         <p className="form-footer">
-          Don&apos;t have an account? <Link to="/register">Register</Link>
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
+        <p className="form-footer">
+          Don&apos;t have an account? <Link to="/signup">Create account</Link>
         </p>
       </section>
     </main>

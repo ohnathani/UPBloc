@@ -5,6 +5,7 @@ import { useAuth } from '../features/auth/auth.hook'
 export function RegisterPage() {
   const navigate = useNavigate()
   const { signUp, loading: authLoading, authError } = useAuth()
+  const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -17,7 +18,7 @@ export function RegisterPage() {
     setError(null)
     setMessage(null)
 
-    if (!email.trim() || !password || !confirmPassword) {
+    if (!displayName.trim() || !email.trim() || !password || !confirmPassword) {
       setError('Complete all fields before registering.')
       return
     }
@@ -30,7 +31,11 @@ export function RegisterPage() {
     setIsSubmitting(true)
 
     try {
-      const { requiresEmailConfirmation } = await signUp(email.trim(), password)
+      const { requiresEmailConfirmation } = await signUp(
+        email.trim(),
+        password,
+        displayName.trim(),
+      )
 
       if (requiresEmailConfirmation) {
         setMessage(
@@ -60,6 +65,17 @@ export function RegisterPage() {
         <p className="muted">Start using UPBloc with your email address.</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
+          <label htmlFor="register-display-name">Display name</label>
+          <input
+            id="register-display-name"
+            type="text"
+            value={displayName}
+            onChange={(event) => setDisplayName(event.target.value)}
+            autoComplete="name"
+            maxLength={80}
+            required
+          />
+
           <label htmlFor="register-email">Email</label>
           <input
             id="register-email"
@@ -107,7 +123,7 @@ export function RegisterPage() {
           )}
 
           <button type="submit" disabled={isBusy}>
-            {isSubmitting ? 'Registering...' : 'Register'}
+            {isSubmitting ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 

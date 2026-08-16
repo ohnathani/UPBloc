@@ -296,6 +296,7 @@ function AccountSettings({ notify }: { notify: (message: string) => void }) {
   const { displayName, updateDisplayName } = useSettings()
   const [name, setName] = useState(displayName)
   const [saving, setSaving] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function saveName(event: React.FormEvent) {
@@ -318,6 +319,7 @@ function AccountSettings({ notify }: { notify: (message: string) => void }) {
 
   async function handleSignOut() {
     setError(null)
+    setSigningOut(true)
     try {
       await signOut()
       navigate('/login', { replace: true })
@@ -327,6 +329,8 @@ function AccountSettings({ notify }: { notify: (message: string) => void }) {
           ? signOutError.message
           : 'Unable to sign out. Please try again.',
       )
+    } finally {
+      setSigningOut(false)
     }
   }
 
@@ -370,8 +374,9 @@ function AccountSettings({ notify }: { notify: (message: string) => void }) {
           type="button"
           className="button-quiet button-danger"
           onClick={handleSignOut}
+          disabled={signingOut}
         >
-          Sign Out
+          {signingOut ? 'Signing out...' : 'Sign Out'}
         </button>
       </div>
     </SettingsSectionFrame>

@@ -8,7 +8,6 @@ import {
   type PropsWithChildren,
 } from 'react'
 import { useAuth } from '../auth/auth.hook'
-import { supabase, supabaseConfigError } from '../../lib/supabase'
 import {
   defaultSettingsPreferences,
   type SettingsPreferences,
@@ -98,7 +97,7 @@ function getWorkspaceName(user: unknown, email: string | undefined) {
 }
 
 export function SettingsProvider({ children }: PropsWithChildren) {
-  const { user } = useAuth()
+  const { user, updateUserMetadata: updateAuthUserMetadata } = useAuth()
   const userKey = getUserKey(user?.email)
   const [preferences, setPreferences] = useState<SettingsPreferences>(() =>
     readPreferences(user?.email),
@@ -146,29 +145,10 @@ export function SettingsProvider({ children }: PropsWithChildren) {
     async (metadata: Record<string, string>) => {
       setSettingsError(null)
 
-      if (!user || !('user_metadata' in user)) {
-        try {
-          if (metadata.workspace_name) {
-            window.localStorage.setItem(
-              getWorkspaceFallbackKey(user?.email),
-              metadata.workspace_name,
-            )
-          }
-        } catch {
-          // The demo account still keeps the value in memory if storage is unavailable.
-        }
-        return
-      }
-
-      if (supabaseConfigError) {
-        throw new Error(supabaseConfigError)
-      }
+      if (!user) throw new Error('You must be logged in to update settings.')
 
       const currentMetadata = user.user_metadata ?? {}
-      const { data, error } = await supabase.auth.updateUser({
-        data: { ...currentMetadata, ...metadata },
-      })
-      if (error) throw new Error(error.message)
+      await updateAuthUserMetadata({ ...currentMetadata, ...metadata })
 
       if (metadata.workspace_name) {
         setWorkspaceName(metadata.workspace_name)
@@ -176,7 +156,7 @@ export function SettingsProvider({ children }: PropsWithChildren) {
       if (metadata.full_name !== undefined) {
         setDisplayName(metadata.full_name)
       }
-      if (data.user && metadata.workspace_name) {
+      if (metadata.workspace_name) {
         try {
           window.localStorage.removeItem(getWorkspaceFallbackKey(user.email))
         } catch {
@@ -184,7 +164,7 @@ export function SettingsProvider({ children }: PropsWithChildren) {
         }
       }
     },
-    [user],
+    [updateAuthUserMetadata, user],
   )
 
   const saveWorkspaceName = useCallback(
