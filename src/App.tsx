@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import { ProtectedRoute } from './features/auth/ProtectedRoute'
@@ -12,7 +13,8 @@ import { TimeTrackerPage } from './pages/TimeTrackerPage'
 
 export function App() {
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
@@ -66,6 +68,8 @@ export function App() {
         />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+      </Routes>
+      <Analytics />
+    </>
   )
 }
