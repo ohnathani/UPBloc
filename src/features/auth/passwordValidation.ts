@@ -6,23 +6,28 @@ export type PasswordRequirement = {
 export const passwordRequirements: PasswordRequirement[] = [
   {
     test: (password) => password.length >= 8,
-    message: 'Password must contain at least 8 characters.',
+    message:
+      'Password must be at least 8 characters and contain an uppercase letter, lowercase letter, number, and special character.',
   },
   {
     test: (password) => /[A-Z]/.test(password),
-    message: 'Password must contain at least 1 uppercase letter.',
+    message:
+      'Password must be at least 8 characters and contain an uppercase letter, lowercase letter, number, and special character.',
   },
   {
     test: (password) => /[a-z]/.test(password),
-    message: 'Password must contain at least 1 lowercase letter.',
+    message:
+      'Password must be at least 8 characters and contain an uppercase letter, lowercase letter, number, and special character.',
   },
   {
     test: (password) => /\d/.test(password),
-    message: 'Password must contain at least 1 number.',
+    message:
+      'Password must be at least 8 characters and contain an uppercase letter, lowercase letter, number, and special character.',
   },
   {
     test: (password) => /[^A-Za-z0-9]/.test(password),
-    message: 'Password must contain at least 1 special character.',
+    message:
+      'Password must be at least 8 characters and contain an uppercase letter, lowercase letter, number, and special character.',
   },
 ]
 

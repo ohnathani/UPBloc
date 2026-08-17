@@ -3,14 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/auth.hook'
 import { getPasswordValidationError } from '../features/auth/passwordValidation'
 
-const passwordRequirements = [
-  'At least 8 characters',
-  'At least 1 uppercase letter',
-  'At least 1 lowercase letter',
-  'At least 1 number',
-  'At least 1 special character',
-]
-
 export function RegisterPage() {
   const navigate = useNavigate()
   const { signUp, loading: authLoading, authError } = useAuth()
@@ -110,14 +102,10 @@ export function RegisterPage() {
             minLength={8}
             required
           />
-          <div className="muted" aria-live="polite">
-            <strong>Password must contain:</strong>
-            <ul>
-              {passwordRequirements.map((requirement) => (
-                <li key={requirement}>{requirement}</li>
-              ))}
-            </ul>
-          </div>
+          <p className="muted" aria-live="polite">
+            Password must be at least 8 characters and contain an uppercase
+            letter, lowercase letter, number, and special character.
+          </p>
 
           <label htmlFor="register-confirm-password">Confirm password</label>
           <input
