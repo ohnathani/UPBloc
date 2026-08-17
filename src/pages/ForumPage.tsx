@@ -94,7 +94,6 @@ export function ForumPage() {
       <div className="dashboard-card">
         <header className="settings-page-header">
           <h1>Forum</h1>
-          <p className="muted">Share questions, ideas, and useful discoveries with your learning community.</p>
         </header>
 
         <form className="auth-form" onSubmit={handleSubmit}>

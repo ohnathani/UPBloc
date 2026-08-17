@@ -420,7 +420,6 @@ export function DashboardPage() {
         <header className="dashboard-header">
           <div>
             <h1>{name ? `${greeting}, ${name}` : 'Welcome to UPBloc'}</h1>
-            <p className="dashboard-subtitle">Here's what's happening today.</p>
           </div>
           <time dateTime={now.toISOString()}>{formatFullDate(now)}</time>
         </header>

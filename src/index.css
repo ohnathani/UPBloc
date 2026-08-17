@@ -517,12 +517,7 @@ input:focus {
   display: flex;
   gap: 2rem;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.tasks-header .muted {
-  margin: 0.7rem 0 0;
-  max-width: 38rem;
+  margin-bottom: 1rem;
 }
 
 .new-task-button {
@@ -1349,12 +1344,8 @@ html[data-theme='dark'] textarea {
 
 .settings-page-header {
   border-bottom: 1px solid var(--upbloc-line);
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.35rem;
-}
-
-.settings-page-header .muted {
-  margin: 0.65rem 0 0;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
 }
 
 .settings-layout {
@@ -1694,16 +1685,11 @@ html[data-theme='dark'] textarea {
   display: flex;
   gap: 1rem;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .time-tracker-header h1 {
-  margin-bottom: 0.35rem;
-}
-
-.time-tracker-header p {
-  margin: 0;
-  max-width: 42rem;
+  margin-bottom: 0;
 }
 
 .time-tracker-layout {
@@ -2226,16 +2212,12 @@ html[data-theme='dark'] textarea {
   display: flex;
   gap: 1.5rem;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .dashboard-header h1 {
   color: var(--upbloc-text);
-}
-
-.dashboard-subtitle {
-  color: var(--upbloc-muted);
-  margin: 0.55rem 0 0;
+  margin-bottom: 0;
 }
 
 .dashboard-header time {
@@ -2611,12 +2593,7 @@ html[data-theme='dark'] textarea {
   display: flex;
   gap: 2rem;
   justify-content: space-between;
-  margin-bottom: 1.75rem;
-}
-
-.schedule-page-header .muted {
-  margin: 0.7rem 0 0;
-  max-width: 42rem;
+  margin-bottom: 1rem;
 }
 
 .schedule-timetable {

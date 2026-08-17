@@ -58,10 +58,6 @@ export function ResetPasswordPage() {
         <section className="auth-card" aria-labelledby="reset-password-title">
           <p className="eyebrow">UPBloc</p>
           <h1 id="reset-password-title">Reset link unavailable</h1>
-          <p className="muted">
-            This password reset link is invalid or expired. Request a new one to
-            continue.
-          </p>
           <p className="form-footer">
             <Link to="/forgot-password">Request a new reset link</Link>
           </p>
@@ -75,7 +71,6 @@ export function ResetPasswordPage() {
       <section className="auth-card" aria-labelledby="reset-password-title">
         <p className="eyebrow">UPBloc</p>
         <h1 id="reset-password-title">Choose a new password</h1>
-        <p className="muted">Set a new password for your UPBloc account.</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label htmlFor="reset-password">New password</label>

@@ -407,9 +407,6 @@ export function SettingsPage() {
       <div className="settings-page-inner">
         <header className="settings-page-header">
           <h1>Settings</h1>
-          <p className="muted">
-            Shape your workspace around the way you study and work.
-          </p>
         </header>
         <div className="settings-layout">
           <nav className="settings-navigation" aria-label="Settings sections">

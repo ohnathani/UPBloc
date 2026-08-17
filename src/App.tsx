@@ -55,36 +55,12 @@ export function App() {
       >
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/schedule" element={<SchedulePage />} />
-        <Route
-          path="/courses"
-          element={
-            <PlaceholderPage
-              title="Courses"
-              description="Keep your courses and learning materials organized."
-            />
-          }
-        />
+        <Route path="/courses" element={<PlaceholderPage title="Courses" />} />
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/time-tracker" element={<TimeTrackerPage />} />
         <Route path="/settings" element={<SettingsPage />} />
-        <Route
-          path="/notes"
-          element={
-            <PlaceholderPage
-              title="Notes"
-              description="Capture and revisit your study notes when you need them."
-            />
-          }
-        />
-        <Route
-          path="/blocks"
-          element={
-            <PlaceholderPage
-              title="Blocks"
-              description="Build focused study blocks around the way you work best."
-            />
-          }
-        />
+        <Route path="/notes" element={<PlaceholderPage title="Notes" />} />
+        <Route path="/blocks" element={<PlaceholderPage title="Blocks" />} />
         <Route path="/forum" element={<ForumPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />

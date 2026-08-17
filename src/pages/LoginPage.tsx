@@ -65,7 +65,6 @@ export function LoginPage() {
       <section className="auth-card" aria-labelledby="login-title">
         <p className="eyebrow">UPBloc</p>
         <h1 id="login-title">Log in</h1>
-        <p className="muted">Use your UPBloc account to continue.</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label htmlFor="login-email">Email</label>

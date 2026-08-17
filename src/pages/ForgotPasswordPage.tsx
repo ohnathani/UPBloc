@@ -44,10 +44,6 @@ export function ForgotPasswordPage() {
       <section className="auth-card" aria-labelledby="forgot-password-title">
         <p className="eyebrow">UPBloc</p>
         <h1 id="forgot-password-title">Reset your password</h1>
-        <p className="muted">
-          Enter your email and we&apos;ll send you a link to choose a new
-          password.
-        </p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label htmlFor="forgot-password-email">Email</label>

@@ -227,10 +227,6 @@ export function TasksPage() {
         <header className="tasks-header">
           <div>
             <h1 id="tasks-title">Tasks</h1>
-            <p className="muted">
-              Keep coursework moving with a clear view of what needs your
-              attention.
-            </p>
           </div>
           <button
             type="button"

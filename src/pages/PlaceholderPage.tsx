@@ -1,9 +1,8 @@
 type PlaceholderPageProps = {
   title: string
-  description: string
 }
 
-export function PlaceholderPage({ title, description }: PlaceholderPageProps) {
+export function PlaceholderPage({ title }: PlaceholderPageProps) {
   return (
     <main className="page-shell app-page-shell">
       <section
@@ -11,7 +10,6 @@ export function PlaceholderPage({ title, description }: PlaceholderPageProps) {
         aria-labelledby="page-title"
       >
         <h1 id="page-title">{title}</h1>
-        <p className="muted">{description}</p>
         <p className="placeholder-note">
           This section is ready for the next feature build.
         </p>

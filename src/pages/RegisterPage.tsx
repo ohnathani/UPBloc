@@ -67,7 +67,6 @@ export function RegisterPage() {
       <section className="auth-card" aria-labelledby="register-title">
         <p className="eyebrow">UPBloc</p>
         <h1 id="register-title">Create an account</h1>
-        <p className="muted">Start using UPBloc with your email address.</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label htmlFor="register-display-name">Display name</label>

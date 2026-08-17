@@ -213,11 +213,6 @@ export function SchedulePage() {
         <header className="schedule-page-header">
           <div>
             <h1>Schedule</h1>
-            <p className="muted">
-              Keep classes, study time, task sessions, and personal commitments
-              visible together. Import a CRS screenshot when you need a head
-              start.
-            </p>
           </div>
           <div className="schedule-page-actions">
             <button

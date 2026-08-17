@@ -671,9 +671,6 @@ export function TimeTrackerPage() {
         <header className="time-tracker-header">
           <div>
             <h1>Time Tracker</h1>
-            <p className="muted">
-              Record actual time spent, separately from scheduled study time.
-            </p>
           </div>
           <button
             type="button"
