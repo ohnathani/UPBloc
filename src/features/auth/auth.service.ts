@@ -36,13 +36,49 @@ export function getAuthErrorMessage(
     return 'An account with this email already exists.'
   }
 
-  if (
-    normalizedMessage.includes('password') &&
-    (normalizedMessage.includes('at least') ||
-      normalizedMessage.includes('weak') ||
-      normalizedMessage.includes('requirements'))
-  ) {
-    return message
+  if (normalizedMessage.includes('password')) {
+    if (
+      normalizedMessage.includes('at least 8') ||
+      normalizedMessage.includes('8 characters') ||
+      normalizedMessage.includes('minimum 8') ||
+      normalizedMessage.includes('too short')
+    ) {
+      return 'Password must contain at least 8 characters.'
+    }
+
+    if (
+      normalizedMessage.includes('uppercase') ||
+      normalizedMessage.includes('capital') ||
+      normalizedMessage.includes('one uppercase')
+    ) {
+      return 'Password must contain at least 1 uppercase letter.'
+    }
+
+    if (
+      normalizedMessage.includes('lowercase') ||
+      normalizedMessage.includes('one lowercase')
+    ) {
+      return 'Password must contain at least 1 lowercase letter.'
+    }
+
+    if (
+      normalizedMessage.includes('number') ||
+      normalizedMessage.includes('digit') ||
+      normalizedMessage.includes('numeric')
+    ) {
+      return 'Password must contain at least 1 number.'
+    }
+
+    if (
+      normalizedMessage.includes('special character') ||
+      normalizedMessage.includes('symbol') ||
+      normalizedMessage.includes('non-alphanumeric') ||
+      normalizedMessage.includes('special')
+    ) {
+      return 'Password must contain at least 1 special character.'
+    }
+
+    return 'Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.'
   }
 
   if (normalizedMessage.includes('email')) {

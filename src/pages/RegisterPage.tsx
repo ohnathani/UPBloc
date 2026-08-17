@@ -1,6 +1,15 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/auth.hook'
+import { getPasswordValidationError } from '../features/auth/passwordValidation'
+
+const passwordRequirements = [
+  'At least 8 characters',
+  'At least 1 uppercase letter',
+  'At least 1 lowercase letter',
+  'At least 1 number',
+  'At least 1 special character',
+]
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -28,8 +37,9 @@ export function RegisterPage() {
       return
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.')
+    const passwordValidationError = getPasswordValidationError(password)
+    if (passwordValidationError) {
+      setError(passwordValidationError)
       return
     }
 
@@ -97,9 +107,17 @@ export function RegisterPage() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             autoComplete="new-password"
-            minLength={6}
+            minLength={8}
             required
           />
+          <div className="muted" aria-live="polite">
+            <strong>Password must contain:</strong>
+            <ul>
+              {passwordRequirements.map((requirement) => (
+                <li key={requirement}>{requirement}</li>
+              ))}
+            </ul>
+          </div>
 
           <label htmlFor="register-confirm-password">Confirm password</label>
           <input
