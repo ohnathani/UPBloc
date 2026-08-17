@@ -439,12 +439,13 @@ function FinishTimerForm({
 
 export function TimeTrackerPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const { tasks } = useTasks()
+  const { tasks, loading: tasksLoading } = useTasks()
   const { preferences } = useSettings()
-  const { events } = useCalendarEvents()
+  const { events, loading: calendarLoading } = useCalendarEvents()
   const {
     entries,
     activeTimer,
+    loading: timeEntriesLoading,
     startTimer,
     pauseTimer,
     resumeTimer,
@@ -611,11 +612,15 @@ export function TimeTrackerPage() {
     setStartError(null)
   }
 
-  function openFinishTimer() {
+  async function openFinishTimer() {
     if (!activeTimer) return
     if (!preferences.confirmBeforeStopping) {
-      saveActiveSession()
-      setFinishNotes('')
+      try {
+        const entry = await saveActiveSession()
+        if (entry) setFinishNotes('')
+      } catch {
+        // The provider exposes the persistent error through the app toast.
+      }
       return
     }
     setFinishNotes(activeTimer.notes)
@@ -623,15 +628,24 @@ export function TimeTrackerPage() {
     setIsFinishOpen(true)
   }
 
-  function handleSaveFinished() {
-    saveActiveSession({ notes: finishNotes })
-    setFinishNotes('')
-    setIsFinishOpen(false)
+  async function handleSaveFinished() {
+    try {
+      const entry = await saveActiveSession({ notes: finishNotes })
+      if (!entry) return
+      setFinishNotes('')
+      setIsFinishOpen(false)
+    } catch {
+      // The provider exposes the persistent error through the app toast.
+    }
   }
 
-  function handleDelete(entry: TimeEntry) {
+  async function handleDelete(entry: TimeEntry) {
     if (!window.confirm('Delete this time entry?')) return
-    deleteEntry(entry.id)
+    try {
+      await deleteEntry(entry.id)
+    } catch {
+      // The provider exposes the persistent error through the app toast.
+    }
   }
 
   function moveReport(amount: number) {
@@ -643,12 +657,19 @@ export function TimeTrackerPage() {
     setIsManualOpen(true)
   }
 
+  if (tasksLoading || calendarLoading || timeEntriesLoading) {
+    return (
+      <main className="page-shell app-page-shell time-tracker-page">
+        <p className="status-message">Loading time tracker...</p>
+      </main>
+    )
+  }
+
   return (
     <main className="page-shell app-page-shell time-tracker-page">
       <div className="time-tracker-inner">
         <header className="time-tracker-header">
           <div>
-            <p className="eyebrow">UPBloc workspace</p>
             <h1>Time Tracker</h1>
             <p className="muted">
               Record actual time spent, separately from scheduled study time.
@@ -1031,11 +1052,15 @@ export function TimeTrackerPage() {
         <TimeEntryForm
           entry={editingEntry}
           tasks={tasks}
-          onSubmit={(values) => {
-            if (editingEntry) updateEntry(editingEntry.id, values)
-            else addEntry(values)
-            setEditingEntry(null)
-            setIsManualOpen(false)
+          onSubmit={async (values) => {
+            try {
+              if (editingEntry) await updateEntry(editingEntry.id, values)
+              else if (!(await addEntry(values))) return
+              setEditingEntry(null)
+              setIsManualOpen(false)
+            } catch {
+              // The provider exposes the persistent error through the app toast.
+            }
           }}
           onClose={() => {
             setEditingEntry(null)

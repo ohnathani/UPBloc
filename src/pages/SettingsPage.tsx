@@ -157,7 +157,7 @@ function WorkspaceSettings({ notify }: { notify: (message: string) => void }) {
   return (
     <SettingsSectionFrame
       title="Workspace"
-      description="Manage the name used to identify your UPBloc workspace."
+      description="Manage the name used to identify your workspace."
     >
       <form className="settings-form" onSubmit={handleSubmit}>
         <div className="settings-field">
@@ -406,7 +406,6 @@ export function SettingsPage() {
     <main className="page-shell app-page-shell settings-page">
       <div className="settings-page-inner">
         <header className="settings-page-header">
-          <p className="eyebrow">UPBloc workspace</p>
           <h1>Settings</h1>
           <p className="muted">
             Shape your workspace around the way you study and work.

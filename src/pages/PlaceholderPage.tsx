@@ -10,7 +10,6 @@ export function PlaceholderPage({ title, description }: PlaceholderPageProps) {
         className="dashboard-card placeholder-card"
         aria-labelledby="page-title"
       >
-        <p className="eyebrow">UPBloc workspace</p>
         <h1 id="page-title">{title}</h1>
         <p className="muted">{description}</p>
         <p className="placeholder-note">

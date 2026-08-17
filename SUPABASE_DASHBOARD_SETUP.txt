@@ -1,0 +1,138 @@
+UPBloc Supabase Dashboard Database Setup
+========================================
+
+The project contains these migrations, which must be applied in timestamp order:
+
+supabase/migrations/20260816170000_create_profiles.sql
+supabase/migrations/20260816180000_add_user_data_isolation.sql
+supabase/migrations/20260816190000_harden_user_data_persistence.sql
+
+Preferred option from the project root:
+1. Install the Supabase CLI if it is not installed.
+2. Link the project with `supabase link --project-ref <your-project-ref>`.
+3. Run `supabase db push` once.
+
+If the CLI is unavailable, run the three migration files in order in the
+Supabase Dashboard SQL Editor. Do not manually recreate tables if a migration
+has already succeeded.
+
+Required existing table
+-----------------------
+
+profiles
+
+Columns:
+- id uuid primary key, references auth.users(id), ON DELETE CASCADE
+- full_name text
+- username text, unique
+- avatar_url text
+- created_at timestamptz, default now()
+- updated_at timestamptz, default now()
+
+The profiles table must have RLS enabled. Users may only select, insert,
+update, or delete their own profile where auth.uid() = id.
+
+Private user-owned tables to create
+-----------------------------------
+
+1. tasks
+
+- id uuid primary key, default gen_random_uuid()
+- user_id uuid not null, references auth.users(id), ON DELETE CASCADE
+- title text not null
+- description text not null, default ''
+- course text not null, default ''
+- due_date date
+- due_time text not null, default ''
+- priority text not null: low, medium, or high
+- status text not null: todo, in-progress, or completed
+- completed boolean not null, default false
+- created_at timestamptz not null, default now()
+- updated_at timestamptz not null, default now()
+
+2. schedule_entries
+
+- id uuid primary key, default gen_random_uuid()
+- user_id uuid not null, references auth.users(id), ON DELETE CASCADE
+- class_code text not null, default ''
+- schedule_group_id text
+- course_code text not null
+- course_title text not null, default ''
+- section text not null, default ''
+- instructor text not null, default ''
+- room text not null, default ''
+- days text[] not null, default '{}'
+- start_time text not null, default ''
+- end_time text not null, default ''
+- units numeric
+- created_at timestamptz not null, default now()
+- updated_at timestamptz not null, default now()
+
+3. calendar_events
+
+- id uuid primary key, default gen_random_uuid()
+- user_id uuid not null, references auth.users(id), ON DELETE CASCADE
+- title text not null
+- description text not null, default ''
+- type text not null: study, task, exam, personal, or other
+- start_datetime timestamptz not null
+- end_datetime timestamptz not null
+- location text not null, default ''
+- course text not null, default ''
+- task_id uuid, linked to the same user's task
+- created_at timestamptz not null, default now()
+- updated_at timestamptz not null, default now()
+
+4. time_entries
+
+- id uuid primary key, default gen_random_uuid()
+- user_id uuid not null, references auth.users(id), ON DELETE CASCADE
+- task_id uuid, linked to the same user's task
+- event_id uuid, linked to the same user's calendar event
+- project_name text not null, default ''
+- course text not null, default ''
+- start_at timestamptz not null
+- end_at timestamptz not null
+- duration_seconds integer not null, default 0
+- notes text not null, default ''
+- created_at timestamptz not null, default now()
+- updated_at timestamptz not null, default now()
+
+RLS for every private table
+---------------------------
+
+Enable Row Level Security on profiles, tasks, schedule_entries,
+calendar_events, and time_entries.
+
+Each private table needs four policies for the authenticated role:
+- SELECT: using (auth.uid() = user_id)
+- INSERT: with check (auth.uid() = user_id)
+- UPDATE: using (auth.uid() = user_id) and with check (auth.uid() = user_id)
+- DELETE: using (auth.uid() = user_id)
+
+The profiles table uses auth.uid() = id instead of user_id.
+
+Forum exception
+--------------
+
+forum_posts
+
+Columns:
+- id uuid primary key, default gen_random_uuid()
+- user_id uuid not null, references auth.users(id), ON DELETE CASCADE
+- title text not null
+- content text not null
+- created_at timestamptz not null, default now()
+- updated_at timestamptz not null, default now()
+
+Enable RLS and create these policies:
+- Authenticated users can SELECT all forum posts using (true).
+- INSERT requires with check (auth.uid() = user_id).
+- UPDATE requires using (auth.uid() = user_id) and with check (auth.uid() = user_id).
+- DELETE requires using (auth.uid() = user_id).
+
+Do not create tables yet for notes, courses, blocks, streaks, or Pomodoro
+sessions because those features do not currently have data models in UPBloc.
+
+Never add a service-role key to frontend environment variables. The frontend
+must use only VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.

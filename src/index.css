@@ -275,7 +275,28 @@ input:focus {
   font-weight: 800;
   height: 2.25rem;
   justify-content: center;
+  position: relative;
   width: 2.25rem;
+}
+
+.app-brand-mark-letter,
+.app-brand-expand-icon {
+  transition: opacity 140ms ease;
+}
+
+.app-brand-expand-icon {
+  opacity: 0;
+  position: absolute;
+}
+
+.sidebar-collapsed .app-brand:hover .app-brand-mark-letter,
+.sidebar-collapsed .app-brand:focus-visible .app-brand-mark-letter {
+  opacity: 0;
+}
+
+.sidebar-collapsed .app-brand:hover .app-brand-expand-icon,
+.sidebar-collapsed .app-brand:focus-visible .app-brand-expand-icon {
+  opacity: 1;
 }
 
 .sidebar-section-label {

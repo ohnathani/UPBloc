@@ -44,9 +44,19 @@ function isOverdue(task: Task, today: string) {
 
 export function TasksPage() {
   const navigate = useNavigate()
-  const { tasks, saveTask, toggleTask, changeTaskStatus, deleteTask } =
-    useTasks()
-  const { events, deleteFutureTaskEvents } = useCalendarEvents()
+  const {
+    tasks,
+    loading: tasksLoading,
+    saveTask,
+    toggleTask,
+    changeTaskStatus,
+    deleteTask,
+  } = useTasks()
+  const {
+    events,
+    loading: calendarLoading,
+    deleteFutureTaskEvents,
+  } = useCalendarEvents()
   const [filter, setFilter] = useState<TaskFilter>('all')
   const [courseFilter, setCourseFilter] = useState('all')
   const [view, setView] = useState<TaskView>('list')
@@ -144,40 +154,55 @@ export function TasksPage() {
     setEditingTask(null)
   }
 
-  function handleSave(values: TaskFormValues) {
-    saveTask(values, editingTask?.id)
-
-    closeForm()
-  }
-
-  function handleToggle(task: Task) {
-    if (!task.completed) {
-      const hasFutureSessions = events.some(
-        (event) =>
-          event.taskId === task.id &&
-          event.type === 'task' &&
-          new Date(event.startDateTime).getTime() > Date.now(),
-      )
-      if (hasFutureSessions) {
-        const keepSessions = window.confirm(
-          'Keep the remaining scheduled sessions? Select Cancel to remove them.',
-        )
-        if (!keepSessions) deleteFutureTaskEvents(task.id)
-      }
+  async function handleSave(values: TaskFormValues) {
+    try {
+      await saveTask(values, editingTask?.id)
+      closeForm()
+    } catch {
+      // The provider exposes the persistent error through the app toast.
     }
-    toggleTask(task.id)
   }
 
-  function handleTaskDrop(taskId: string, status: TaskStatus) {
-    changeTaskStatus(taskId, status)
-    setDraggingTaskId(null)
+  async function handleToggle(task: Task) {
+    try {
+      if (!task.completed) {
+        const hasFutureSessions = events.some(
+          (event) =>
+            event.taskId === task.id &&
+            event.type === 'task' &&
+            new Date(event.startDateTime).getTime() > Date.now(),
+        )
+        if (hasFutureSessions) {
+          const keepSessions = window.confirm(
+            'Keep the remaining scheduled sessions? Select Cancel to remove them.',
+          )
+          if (!keepSessions) await deleteFutureTaskEvents(task.id)
+        }
+      }
+      await toggleTask(task.id)
+    } catch {
+      // The provider exposes the persistent error through the app toast.
+    }
   }
 
-  function handleDelete(task: Task) {
+  async function handleTaskDrop(taskId: string, status: TaskStatus) {
+    try {
+      await changeTaskStatus(taskId, status)
+      setDraggingTaskId(null)
+    } catch {
+      // The provider exposes the persistent error through the app toast.
+    }
+  }
+
+  async function handleDelete(task: Task) {
     const confirmed = window.confirm(`Delete "${task.title}"?`)
     if (!confirmed) return
 
-    deleteTask(task.id)
+    try {
+      await deleteTask(task.id)
+    } catch {
+      // The provider exposes the persistent error through the app toast.
+    }
   }
 
   function handleSchedule(task: Task) {
@@ -188,12 +213,19 @@ export function TasksPage() {
     navigate(`/time-tracker?task=${encodeURIComponent(task.id)}`)
   }
 
+  if (tasksLoading || calendarLoading) {
+    return (
+      <main className="page-shell app-page-shell tasks-page">
+        <p className="status-message">Loading tasks...</p>
+      </main>
+    )
+  }
+
   return (
     <main className="page-shell app-page-shell tasks-page">
       <div className="tasks-page-inner">
         <header className="tasks-header">
           <div>
-            <p className="eyebrow">UPBloc workspace</p>
             <h1 id="tasks-title">Tasks</h1>
             <p className="muted">
               Keep coursework moving with a clear view of what needs your

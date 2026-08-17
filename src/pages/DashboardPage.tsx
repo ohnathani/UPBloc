@@ -392,22 +392,26 @@ export function DashboardPage() {
     navigate(taskId ? `/tasks?task=${taskId}` : '/tasks?action=add')
   }
 
-  function handleDashboardTaskToggle(task: Task) {
-    if (!task.completed) {
-      const hasFutureSessions = events.some(
-        (event) =>
-          event.taskId === task.id &&
-          event.type === 'task' &&
-          new Date(event.startDateTime).getTime() > Date.now(),
-      )
-      if (hasFutureSessions) {
-        const keepSessions = window.confirm(
-          'Keep the remaining scheduled sessions? Select Cancel to remove them.',
+  async function handleDashboardTaskToggle(task: Task) {
+    try {
+      if (!task.completed) {
+        const hasFutureSessions = events.some(
+          (event) =>
+            event.taskId === task.id &&
+            event.type === 'task' &&
+            new Date(event.startDateTime).getTime() > Date.now(),
         )
-        if (!keepSessions) deleteFutureTaskEvents(task.id)
+        if (hasFutureSessions) {
+          const keepSessions = window.confirm(
+            'Keep the remaining scheduled sessions? Select Cancel to remove them.',
+          )
+          if (!keepSessions) await deleteFutureTaskEvents(task.id)
+        }
       }
+      await toggleTask(task.id)
+    } catch {
+      // The provider exposes the persistent error through the app toast.
     }
-    toggleTask(task.id)
   }
 
   return (
@@ -415,7 +419,6 @@ export function DashboardPage() {
       <div className="dashboard-inner">
         <header className="dashboard-header">
           <div>
-            <p className="eyebrow">UPBloc workspace</p>
             <h1>{name ? `${greeting}, ${name}` : 'Welcome to UPBloc'}</h1>
             <p className="dashboard-subtitle">Here's what's happening today.</p>
           </div>
@@ -664,9 +667,14 @@ export function DashboardPage() {
                 <button
                   type="button"
                   className="button-quiet button-danger"
-                  onClick={() => {
-                    if (window.confirm('Stop and save the active timer?'))
-                      saveActiveSession()
+                  onClick={async () => {
+                    if (!window.confirm('Stop and save the active timer?'))
+                      return
+                    try {
+                      await saveActiveSession()
+                    } catch {
+                      // The provider exposes the persistent error through the app toast.
+                    }
                   }}
                 >
                   Stop

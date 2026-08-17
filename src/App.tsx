@@ -6,6 +6,7 @@ import {
 } from './features/auth/ProtectedRoute'
 import { DashboardPage } from './pages/DashboardPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+import { ForumPage } from './pages/ForumPage'
 import { LoginPage } from './pages/LoginPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -84,15 +85,7 @@ export function App() {
             />
           }
         />
-        <Route
-          path="/forum"
-          element={
-            <PlaceholderPage
-              title="Forum"
-              description="Connect with your learning community and share ideas."
-            />
-          }
-        />
+        <Route path="/forum" element={<ForumPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

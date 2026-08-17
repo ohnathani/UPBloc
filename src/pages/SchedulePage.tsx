@@ -22,11 +22,17 @@ export function SchedulePage() {
   const navigate = useNavigate()
   const {
     entries,
+    loading: scheduleLoading,
     importEntries,
     saveEntry: persistEntry,
     deleteEntry: removeEntry,
   } = useSchedule()
-  const { events, saveEvent, deleteEvent } = useCalendarEvents()
+  const {
+    events,
+    loading: calendarLoading,
+    saveEvent,
+    deleteEvent,
+  } = useCalendarEvents()
   const { tasks } = useTasks()
   const [isImporterOpen, setIsImporterOpen] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<ScheduleEntry | null>(null)
@@ -79,9 +85,21 @@ export function SchedulePage() {
     }
   }, [entries, events, searchParams, setSearchParams, tasks])
 
-  function handleImport(importedEntries: ScheduleEntry[]) {
-    importEntries(importedEntries)
-    setIsImporterOpen(false)
+  async function handleImport(importedEntries: ScheduleEntry[]) {
+    try {
+      await importEntries(importedEntries)
+      setIsImporterOpen(false)
+    } catch {
+      // The provider exposes the persistent error through the app toast.
+    }
+  }
+
+  if (scheduleLoading || calendarLoading) {
+    return (
+      <main className="page-shell app-page-shell schedule-page">
+        <p className="status-message">Loading your schedule...</p>
+      </main>
+    )
   }
 
   function openNewEntryEditor() {
@@ -95,18 +113,25 @@ export function SchedulePage() {
     setIsEditorOpen(true)
   }
 
-  function saveEntry(draft: ScheduleEntryDraft) {
-    persistEntry(draft, editingEntry?.id)
-
-    setIsEditorOpen(false)
-    setEditingEntry(null)
+  async function saveEntry(draft: ScheduleEntryDraft) {
+    try {
+      await persistEntry(draft, editingEntry?.id)
+      setIsEditorOpen(false)
+      setEditingEntry(null)
+    } catch {
+      // The provider exposes the persistent error through the app toast.
+    }
   }
 
-  function deleteEntry(entry: ScheduleEntry) {
+  async function deleteEntry(entry: ScheduleEntry) {
     if (!window.confirm(`Delete ${entry.courseCode} from your schedule?`))
       return
-    removeEntry(entry.id)
-    setSelectedEntry(null)
+    try {
+      await removeEntry(entry.id)
+      setSelectedEntry(null)
+    } catch {
+      // The provider exposes the persistent error through the app toast.
+    }
   }
 
   function openCreateEvent(values?: Partial<CalendarEventDraft>) {
@@ -123,17 +148,25 @@ export function SchedulePage() {
     setIsEventFormOpen(true)
   }
 
-  function handleSaveEvent(values: CalendarEventDraft) {
-    saveEvent(values, editingEvent?.id)
-    setIsEventFormOpen(false)
-    setEditingEvent(null)
-    setEventFormInitial(undefined)
+  async function handleSaveEvent(values: CalendarEventDraft) {
+    try {
+      await saveEvent(values, editingEvent?.id)
+      setIsEventFormOpen(false)
+      setEditingEvent(null)
+      setEventFormInitial(undefined)
+    } catch {
+      // The provider exposes the persistent error through the app toast.
+    }
   }
 
-  function handleDeleteEvent(event: CalendarEvent) {
+  async function handleDeleteEvent(event: CalendarEvent) {
     if (!window.confirm(`Delete "${event.title}" from your calendar?`)) return
-    deleteEvent(event.id)
-    setSelectedEvent(null)
+    try {
+      await deleteEvent(event.id)
+      setSelectedEvent(null)
+    } catch {
+      // The provider exposes the persistent error through the app toast.
+    }
   }
 
   function getEventConflicts(event: CalendarEvent) {
@@ -179,7 +212,6 @@ export function SchedulePage() {
       <div className="schedule-page-inner">
         <header className="schedule-page-header">
           <div>
-            <p className="eyebrow">UPBloc workspace</p>
             <h1>Schedule</h1>
             <p className="muted">
               Keep classes, study time, task sessions, and personal commitments

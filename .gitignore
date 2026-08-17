@@ -5,3 +5,5 @@ dist
 .env.*.local
 !.env.example
 *.tsbuildinfo
+.tools/
+postgresql-*-windows-x64-binaries.zip

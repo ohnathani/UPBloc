@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../features/auth/auth.hook'
+import { useCalendarEvents } from '../../features/schedule/calendarEvents.context'
+import { useSchedule } from '../../features/schedule/schedule.context'
+import { useTasks } from '../../features/tasks/tasks.context'
 import { GlobalMiniTimer } from '../../features/time-tracker/components/GlobalMiniTimer'
 import { useTimeTracker } from '../../features/time-tracker/timeTracker.context'
 import { useSettings } from '../../features/settings/settings.context'
@@ -200,11 +203,38 @@ function SidebarCollapseIcon() {
   )
 }
 
+function SidebarExpandIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="app-brand-expand-icon"
+      fill="none"
+      height="18"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+      viewBox="0 0 24 24"
+      width="18"
+    >
+      <path d="M9 3H3v6M3 3l6 6M15 3h6v6M21 3l-6 6M9 21H3v-6M3 21l6-6M15 21h6v-6M21 21l-6-6" />
+    </svg>
+  )
+}
+
 export function AppLayout() {
   const location = useLocation()
   const { user } = useAuth()
-  const { activeTimer, pauseTimer, resumeTimer } = useTimeTracker()
-  const { preferences, workspaceName } = useSettings()
+  const {
+    activeTimer,
+    pauseTimer,
+    resumeTimer,
+    error: timeTrackerError,
+  } = useTimeTracker()
+  const { error: scheduleError } = useSchedule()
+  const { error: calendarError } = useCalendarEvents()
+  const { error: tasksError } = useTasks()
+  const { preferences, workspaceName, settingsError } = useSettings()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(
     preferences.sidebarDefaultCollapsed,
   )
@@ -273,7 +303,8 @@ export function AppLayout() {
             }}
           >
             <span className="app-brand-mark" aria-hidden="true">
-              U
+              <span className="app-brand-mark-letter">U</span>
+              <SidebarExpandIcon />
             </span>
             <span>
               <strong>UPBloc</strong>
@@ -339,6 +370,20 @@ export function AppLayout() {
         </header>
 
         <GlobalMiniTimer />
+
+        {(tasksError ||
+          scheduleError ||
+          calendarError ||
+          timeTrackerError ||
+          settingsError) && (
+          <div className="time-tracker-toast" role="alert">
+            {tasksError ||
+              scheduleError ||
+              calendarError ||
+              timeTrackerError ||
+              settingsError}
+          </div>
+        )}
 
         <Outlet />
       </div>

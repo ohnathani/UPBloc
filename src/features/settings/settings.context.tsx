@@ -9,6 +9,11 @@ import {
 } from 'react'
 import { useAuth } from '../auth/auth.hook'
 import {
+  ensureCurrentProfile,
+  updateCurrentProfile,
+} from '../../services/profiles'
+import { getPersistenceErrorMessage } from '../../lib/persistence'
+import {
   defaultSettingsPreferences,
   type SettingsPreferences,
 } from './settings.types'
@@ -32,23 +37,20 @@ const SettingsContext = createContext<SettingsContextValue | undefined>(
 )
 
 const preferencesStoragePrefix = 'upbloc:settings:'
-const workspaceFallbackPrefix = 'upbloc:workspace-name:'
 
-function getUserKey(email: string | undefined) {
-  return email?.trim().toLowerCase() || 'anonymous'
+function getUserKey(userId: string | undefined) {
+  return userId || null
 }
 
-function getPreferencesStorageKey(email: string | undefined) {
-  return preferencesStoragePrefix + getUserKey(email)
+function getPreferencesStorageKey(userId: string | undefined) {
+  const key = getUserKey(userId)
+  return key ? preferencesStoragePrefix + key : null
 }
 
-function getWorkspaceFallbackKey(email: string | undefined) {
-  return workspaceFallbackPrefix + getUserKey(email)
-}
-
-function readPreferences(email: string | undefined) {
+function readPreferences(userId: string | undefined) {
   try {
-    const raw = window.localStorage.getItem(getPreferencesStorageKey(email))
+    const storageKey = getPreferencesStorageKey(userId)
+    const raw = storageKey ? window.localStorage.getItem(storageKey) : null
     if (!raw) {
       const legacySidebarState = window.localStorage.getItem(
         'upbloc-sidebar-collapsed',
@@ -83,24 +85,16 @@ function getDisplayName(user: unknown) {
   )
 }
 
-function getWorkspaceName(user: unknown, email: string | undefined) {
+function getWorkspaceName(user: unknown) {
   const metadataName = getMetadataValue(user, 'workspace_name')
-  if (metadataName) return metadataName
-
-  try {
-    return (
-      window.localStorage.getItem(getWorkspaceFallbackKey(email)) || 'UPBloc'
-    )
-  } catch {
-    return 'UPBloc'
-  }
+  return metadataName || 'UPBloc'
 }
 
 export function SettingsProvider({ children }: PropsWithChildren) {
   const { user, updateUserMetadata: updateAuthUserMetadata } = useAuth()
-  const userKey = getUserKey(user?.email)
+  const userKey = getUserKey(user?.id)
   const [preferences, setPreferences] = useState<SettingsPreferences>(() =>
-    readPreferences(user?.email),
+    readPreferences(user?.id),
   )
   const [workspaceName, setWorkspaceName] = useState('UPBloc')
   const [displayName, setDisplayName] = useState('')
@@ -108,23 +102,54 @@ export function SettingsProvider({ children }: PropsWithChildren) {
   const [settingsError, setSettingsError] = useState<string | null>(null)
 
   useEffect(() => {
-    setPreferences(readPreferences(user?.email))
-    setWorkspaceName(getWorkspaceName(user, user?.email))
+    let cancelled = false
+    setPreferences(readPreferences(user?.id))
+    setWorkspaceName(getWorkspaceName(user))
     setDisplayName(getDisplayName(user))
     setSettingsError(null)
-    setSettingsLoading(false)
+    setSettingsLoading(Boolean(user))
+
+    if (!user) {
+      setSettingsLoading(false)
+      return () => {
+        cancelled = true
+      }
+    }
+
+    void (async () => {
+      try {
+        const profile = await ensureCurrentProfile(getDisplayName(user))
+        if (cancelled) return
+        setDisplayName(profile.fullName || getDisplayName(user))
+      } catch (loadError) {
+        if (cancelled) return
+        console.error('Failed to load profile:', loadError)
+        setSettingsError(
+          getPersistenceErrorMessage(
+            loadError,
+            'Unable to load your profile settings.',
+          ),
+        )
+      } finally {
+        if (!cancelled) setSettingsLoading(false)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
   }, [user, userKey])
 
   useEffect(() => {
+    const storageKey = getPreferencesStorageKey(user?.id)
+    if (!storageKey) return
+
     try {
-      window.localStorage.setItem(
-        getPreferencesStorageKey(user?.email),
-        JSON.stringify(preferences),
-      )
+      window.localStorage.setItem(storageKey, JSON.stringify(preferences))
     } catch {
       // Preferences remain available for the current session if storage is unavailable.
     }
-  }, [preferences, user?.email])
+  }, [preferences, user?.id])
 
   useEffect(() => {
     const root = document.documentElement
@@ -148,20 +173,22 @@ export function SettingsProvider({ children }: PropsWithChildren) {
       if (!user) throw new Error('You must be logged in to update settings.')
 
       const currentMetadata = user.user_metadata ?? {}
-      await updateAuthUserMetadata({ ...currentMetadata, ...metadata })
+      try {
+        await updateAuthUserMetadata({ ...currentMetadata, ...metadata })
+      } catch (metadataError) {
+        const message =
+          metadataError instanceof Error
+            ? metadataError.message
+            : 'Unable to save your settings. Please try again.'
+        setSettingsError(message)
+        throw metadataError
+      }
 
       if (metadata.workspace_name) {
         setWorkspaceName(metadata.workspace_name)
       }
       if (metadata.full_name !== undefined) {
         setDisplayName(metadata.full_name)
-      }
-      if (metadata.workspace_name) {
-        try {
-          window.localStorage.removeItem(getWorkspaceFallbackKey(user.email))
-        } catch {
-          // Ignore cleanup errors after a successful Supabase update.
-        }
       }
     },
     [updateAuthUserMetadata, user],
@@ -186,8 +213,19 @@ export function SettingsProvider({ children }: PropsWithChildren) {
       if (trimmedName.length > 80) {
         throw new Error('Display name must be 80 characters or fewer.')
       }
-      await updateUserMetadata({ full_name: trimmedName })
-      setDisplayName(trimmedName)
+      setSettingsError(null)
+      try {
+        const profile = await updateCurrentProfile({ fullName: trimmedName })
+        setDisplayName(profile.fullName)
+        await updateUserMetadata({ full_name: trimmedName })
+      } catch (saveError) {
+        const message = getPersistenceErrorMessage(
+          saveError,
+          'Unable to save your display name.',
+        )
+        setSettingsError(message)
+        throw saveError
+      }
     },
     [updateUserMetadata],
   )
