@@ -63,6 +63,7 @@ export function RegisterPage() {
   }
 
   const isBusy = authLoading || isSubmitting
+  const passwordIsValid = getPasswordValidationError(password) === null
 
   return (
     <main className="page-shell">
@@ -102,10 +103,12 @@ export function RegisterPage() {
             minLength={8}
             required
           />
-          <p className="muted" aria-live="polite">
-            Password must be at least 8 characters and contain an uppercase
-            letter, lowercase letter, number, and special character.
-          </p>
+          {password && passwordIsValid && (
+            <p className="muted" aria-live="polite">
+              Password must be at least 8 characters and contain an uppercase
+              letter, lowercase letter, number, and special character.
+            </p>
+          )}
 
           <label htmlFor="register-confirm-password">Confirm password</label>
           <input
