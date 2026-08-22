@@ -3,9 +3,15 @@ UPBloc Supabase Dashboard Database Setup
 
 The project contains these migrations, which must be applied in timestamp order:
 
+supabase/migrations/20260816165000_reconcile_empty_placeholders.sql
 supabase/migrations/20260816170000_create_profiles.sql
 supabase/migrations/20260816180000_add_user_data_isolation.sql
 supabase/migrations/20260816190000_harden_user_data_persistence.sql
+
+The first migration only handles the known linked-project state: six empty
+two-column placeholder tables. It renames them to `_upbloc_legacy_*_placeholder`
+so the real schema can be created without deleting them. It aborts if any
+placeholder contains rows or has an unexpected schema.
 
 Preferred option from the project root:
 1. Install the Supabase CLI if it is not installed.
@@ -136,3 +142,32 @@ sessions because those features do not currently have data models in UPBloc.
 
 Never add a service-role key to frontend environment variables. The frontend
 must use only VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.
+
+Verification workflow
+---------------------
+
+The repository includes a read-only catalog check at:
+
+supabase/verify_schema.sql
+
+After applying migrations, run this from the project root:
+
+  npm run db:verify
+
+Every returned row should have status PASS. The script reports missing tables,
+columns, primary keys, foreign keys, RLS, or policies and does not modify the
+database.
+
+For a local Supabase instance, start the local stack first and run:
+
+  npm run db:verify:local
+
+The intended workflow is:
+
+  edit schema -> add a timestamped migration -> npm run db:push ->
+  npm run db:verify -> npm run lint -> npm run build
+
+Do not use `supabase db reset` against a database containing user data. The
+current Courses and Notes routes are placeholders and have no frontend data
+model or queries, so their tables are intentionally not part of the current
+schema verification set.

@@ -363,6 +363,7 @@ input:focus {
 }
 
 .app-content {
+  --app-page-gutter: clamp(1rem, 2vw, 1.5rem);
   margin-left: var(--app-sidebar-width);
   min-height: 100vh;
   transition: margin-left 160ms ease;
@@ -407,7 +408,18 @@ input:focus {
 }
 
 .app-content > .page-shell {
+  justify-content: flex-start;
   min-height: 100vh;
+  padding-inline: var(--app-page-gutter);
+}
+
+.app-content > .page-shell .dashboard-card {
+  max-width: none;
+  width: 100%;
+}
+
+.app-content > .page-shell > .dashboard-grid {
+  width: 100%;
 }
 
 .placeholder-card {
@@ -503,12 +515,12 @@ input:focus {
 .tasks-page {
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 2rem clamp(1rem, 4vw, 2.5rem);
+  padding: 2rem var(--app-page-gutter);
 }
 
 .tasks-page-inner {
   margin: 0 auto;
-  max-width: 68rem;
+  max-width: none;
   width: 100%;
 }
 
@@ -1333,12 +1345,12 @@ html[data-theme='dark'] textarea {
 .settings-page {
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 2rem clamp(1rem, 4vw, 2.5rem);
+  padding: 2rem var(--app-page-gutter);
 }
 
 .settings-page-inner {
   margin: 0 auto;
-  max-width: 72rem;
+  max-width: none;
   width: 100%;
 }
 
@@ -1613,7 +1625,7 @@ html[data-theme='dark'] textarea {
   color: #fff;
   display: flex;
   gap: 0.65rem;
-  margin: 0 1.5rem;
+  margin: 0 var(--app-page-gutter);
   padding: 0.5rem 0.75rem;
 }
 
@@ -1676,7 +1688,7 @@ html[data-theme='dark'] textarea {
 
 .time-tracker-inner {
   margin: 0 auto;
-  max-width: 78rem;
+  max-width: none;
   width: 100%;
 }
 
@@ -2198,12 +2210,12 @@ html[data-theme='dark'] textarea {
 .dashboard-page {
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 2rem clamp(1rem, 4vw, 2.5rem);
+  padding: 2rem var(--app-page-gutter);
 }
 
 .dashboard-inner {
   margin: 0 auto;
-  max-width: 76rem;
+  max-width: none;
   width: 100%;
 }
 
@@ -2579,12 +2591,12 @@ html[data-theme='dark'] textarea {
 .schedule-page {
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 2rem clamp(1rem, 4vw, 2.5rem);
+  padding: 2rem var(--app-page-gutter);
 }
 
 .schedule-page-inner {
   margin: 0 auto;
-  max-width: 72rem;
+  max-width: none;
   width: 100%;
 }
 

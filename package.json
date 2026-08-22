@@ -7,6 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "db:push": "supabase db push",
+    "db:verify": "supabase db query --linked --file supabase/verify_schema.sql",
+    "db:verify:local": "supabase db query --local --file supabase/verify_schema.sql",
     "preview": "vite preview",
     "format": "prettier --write ."
   },
